@@ -1,0 +1,55 @@
+component R_table_1Temp
+% R_table_1Temp
+% Models a resistor where the resistance value (R) depends on an external
+% physical signal input SOC.
+
+% Copyright 2012-2013 The MathWorks, Inc.
+    
+    nodes
+        p = foundation.electrical.electrical; % +:left
+        n = foundation.electrical.electrical; % -:right
+    end
+
+    inputs
+        SOC = {1,'1'}; %SOC:left
+    end
+    
+    parameters (Size=variable)
+        R_Table = {1e-3*ones(5,1),'Ohm'};   % Vector of resistance values
+        SOC_Table = {[0;0.1;0.5;0.9;1],'1'} % Corresponding SOC breakpoints
+    end
+    
+    variables(Access=private)
+        i = { 0, 'A' }; % Current
+        v = { 0, 'V' }; % Voltage
+    end
+    
+    function setup
+    
+        % Check parameter values
+        if any(value(R_Table,'Ohm')<=0)
+            pm_error('simscape:GreaterThanZero','Vector of resistance values');
+        end
+        if any(value(SOC_Table,'1')<0)
+            pm_error('simscape:GreaterThanOrEqualToZero','Corresponding SOC breakpoints');
+        end
+    
+    end
+    
+    branches
+        i : p.i -> n.i;
+    end
+    
+    equations
+        v == p.v - n.v;
+        let
+            % Perform the table lookup
+            R = tablelookup(SOC_Table,R_Table,SOC,...
+                interpolation=linear,extrapolation=nearest)
+        in
+            % Electrical equation
+            v == i*R;
+        end
+    end
+    
+end
