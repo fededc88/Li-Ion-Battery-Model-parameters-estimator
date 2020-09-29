@@ -1,6 +1,7 @@
 # Semi-Automatic Li-Ion battery RC model parameters estimator
 
-Developed by ***Federico Ceccarelli***, in collaboration with Matin Moya and Lucio Santos. for a Li-Ion batterys BMS.
+Developed by ***Federico Ceccarelli***, in collaboration with Matin Moya and Lucio Santos, for a Li-Ion batterys BMS.
+
 Universidad Nacional de Rosario
 
 Any kind of Submission are welcome to fededc88@gmail.com
