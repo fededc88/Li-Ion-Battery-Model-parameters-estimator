@@ -40,3 +40,21 @@ Compact Power Inc.
 <a id="1">[1]</a> 
 Dr. Phillip Kollmeyer (2018). 
 Panasonic 18650PF Li-ion Battery Data
+
+For this example was used the five pulses discharge HPPC test (0.5, 1, 2, 4, 6C) performed at 100, 95,
+90, 80, 70..., 30, 25, 20, 15, 10, 5, 0 % SOC.
+Data was taken from the battery test performed at the University of Wisconsin-Madison by *Dr. Phillip Kollmeyer* (phillip.kollmeyer@gmail.com).
+
+## Referencing
+
+Do you find this project interesting or useful for your work? Please let us know 
+(@moyamartin, @fededc88, @lusho2206) and cite this work using:
+
+```
+@article {
+    Author = {Ceccarelli, Federico; Moya, Martin; Santos Lucio}
+    Title = {Semi-Automatic Li-Ion battery RC model parameters estimator}
+    Year = {2021}
+    Institute = {Faculty of Exact Sciences, Engineering and Land Surveing -
+    National University of Rosario}
+}
