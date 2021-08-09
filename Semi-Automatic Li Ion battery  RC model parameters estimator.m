@@ -1,14 +1,17 @@
-
-
-%% Let Obtain parameters!
+%% Lets Obtain parameters!
 
 % Semi-Automatic  Li-Ion battery RC model parameters estimator
 
 % Developed by Federico Ceccarelli for a Li-Ion BMS. In
-% collaboration with Matin Moya and Lucio Santos
+% collaboration with Martin Moya and Lucio Santos
 
 % Submission are welcome to fededc88@gmail.com 
+%% Load dependencies
 
+addpath("./Lib")
+addpath("./Simulink Models")
+addpath("../dataset_18650pf")
+addpath("../Lib/Optimizer")
 %% Load data to workspace from dataset
 
 % The included tests were performed at the University of Wisconsin-Madison
@@ -24,10 +27,24 @@ disp('loading ... Five pulse discharge HPPC test Data');
 load('../dataset_18650pf/25degC/5 pulse disch/03-11-17_08.47 25degC_5Pulse_HPPC_Pan18650PF.mat');
 
 % Make BEBUG_PLOT = 1 if you want to see graphics in every subsection
-DEBUG_PLOT = 0;
+DEBUG_PLOT = 1;
 
 Current = [meas.Time, meas.Current];
 Voltage = [meas.Time,meas.Voltage];
+
+% plot the HPPC curve
+if DEBUG_PLOT
+    ax1 = subplot(211)
+    plot(meas.Time, meas.Voltage);
+    title('Curva HPPC')
+    xlabel('t [s]')
+    ylabel('V_{out} [V]');
+    ax2 = subplot(212)
+    plot(meas.Time, meas.Current);
+    xlabel('t [s]');
+    ylabel('I [A]');
+    linkaxes([ax1, ax2], 'x');
+end
 
 %% Determine SOC
 
@@ -98,10 +115,6 @@ end
 %% %% Rescue SOC values for Look Up table
 n = 1;
 for i = 1 : length(SOC)
-%     if(Current_flanks(i) == -1)
-%         SOC_lutable(n,1) = SOC(i);
-%         n = n+1;
-%     end
     if(Current_flanks(i) == 1)
         SOC_lutable(n,1) = SOC(i);
         n = n+1;
