@@ -1,0 +1,4 @@
+[submodule "Panasonic-18650PF-Data"]
+	path = Panasonic-18650PF-Data
+	url = git@github.com:fededc88/Panasonic-18650PF-Data.git
+	branch = 25degC
