@@ -1,10 +1,10 @@
 
-function vOpt = Optimization()
+function vOpt = Optimization(voltage_buffer, time_buffer, Start, Stop, i)
 
 % Create an experiment object to store the measured input/output data.
 Exp = sdo.Experiment('SingleSOC_Batery_Model');
 
-global voltage_buffer time_buffer Start Stop i
+%global voltage_buffer time_buffer Start Stop i
 
 % Create an object to store the measured Terminal Voltage output.
 TerminalV = Simulink.SimulationData.Signal;
@@ -25,7 +25,7 @@ Exp.OutputData = [ TerminalV ];
 % Exp.InitialStates.Free    = true;
 
 %Create a simulation scenario using the experiment and obtain the simulated output.
-Simulator    = createSimulator(Exp);
+Simulator = createSimulator(Exp);
 Simulator    = sim(Simulator, 'StartTime', Start, 'StopTime', Stop );
 
 % Search for the Terminal Voltage signal in the logged simulation data.

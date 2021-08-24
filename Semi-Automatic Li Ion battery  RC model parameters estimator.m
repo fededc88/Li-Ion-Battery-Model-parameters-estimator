@@ -5,13 +5,22 @@
 % Developed by Federico Ceccarelli for a Li-Ion BMS. In
 % collaboration with Martin Moya and Lucio Santos
 
-% Submission are welcome to fededc88@gmail.com 
+% Submission are welcome to fededc88@gmail.com
+
 %% Load dependencies
 
-addpath("./Lib")
-addpath("./Simulink Models")
-addpath("../dataset_18650pf")
-addpath("../Lib/Optimizer")
+disp('Change Current Folder to active file name location');
+cd  (fileparts(matlab.desktop.editor.getActiveFilename));
+
+disp('adding... ./Lib path');
+addpath("./Lib");
+disp('adding... ./Simulink Models path');
+addpath("./Simulink Models");
+disp('adding... ./Panasonic-18650PF-Data path');
+addpath("./Panasonic-18650PF-Data");
+disp('adding... /Lib/Optimizer path');
+addpath("./Lib/Optimizer");
+
 %% Load data to workspace from dataset
 
 % The included tests were performed at the University of Wisconsin-Madison
@@ -24,7 +33,7 @@ addpath("../Lib/Optimizer")
 % determine the SOC for each pulse set. 
 
 disp('loading ... Five pulse discharge HPPC test Data');
-load('../dataset_18650pf/25degC/5 pulse disch/03-11-17_08.47 25degC_5Pulse_HPPC_Pan18650PF.mat');
+load('Panasonic-18650PF-Data/Panasonic 18650PF Data/25degC/5 pulse disch/03-11-17_08.47 25degC_5Pulse_HPPC_Pan18650PF.mat');
 
 % Make BEBUG_PLOT = 1 if you want to see graphics in every subsection
 DEBUG_PLOT = 1;
@@ -34,16 +43,20 @@ Voltage = [meas.Time,meas.Voltage];
 
 % plot the HPPC curve
 if DEBUG_PLOT
-    ax1 = subplot(211)
+    figure();
+    ax1 = subplot(211);
     plot(meas.Time, meas.Voltage);
-    title('Curva HPPC')
+    title('25degC 5Pulse HPPC Curve Pan18650PF')
     xlabel('t [s]')
     ylabel('V_{out} [V]');
-    ax2 = subplot(212)
+    ax2 = subplot(212);
     plot(meas.Time, meas.Current);
     xlabel('t [s]');
     ylabel('I [A]');
     linkaxes([ax1, ax2], 'x');
+    
+    % Clean Workspace
+    clear ax1 ax2;
 end
 
 %% Determine SOC
@@ -59,8 +72,11 @@ clear min_ah;
 
 % Check SOC grapicaly
 if DEBUG_PLOT
+    figure();
     plot(meas.Time,SOC);
     title( 'SOC ');
+    xlabel('t [s]');
+    ylabel('SOC');
 end
 
 %% Rescue flanks positions on Current Vector
@@ -69,9 +85,11 @@ Current_flanks = flanks(meas.Current, 50);
 
 % Check Flanks vs Current and Voltage
 if DEBUG_PLOT
+    figure();
     plot( meas.Time, Current_flanks, meas.Time, meas.Current, meas.Time, meas.Voltage);
     legend( 'flanks','meas.Current','meas.Voltage');
     title( 'Flanks vs meas.Current vs meas.Voltage');
+    xlabel('t [s]');
 end
 
 %% Rescue OCV values
@@ -107,6 +125,7 @@ clear i n OCV;
 
 % Check graphically Voltage Vs Vocv
 if DEBUG_PLOT
+    figure();
     plot(meas.Time, meas.Voltage,Vocv_table(:,1),Vocv_table(:,2));
     legend( 'meas.Voltage','Vocv');
     title( 'Voltage Vs Vocv');
@@ -125,11 +144,8 @@ end
 
 indexes = struct('start',0,'end',0);
 
-%Rescato el numero de muestras donde inician y terminan los periodos de
-%relajación
-
+% Find and saves elemen number where start and end every relaxation Preriode
 i=1;
-
 for( n = 1 : length(Current_flanks) )
 
     if(Current_flanks(n) == -1)
@@ -141,59 +157,50 @@ for( n = 1 : length(Current_flanks) )
     end
 end
 
-
-
-% Check graphically Voltage valid data periods
+% Validates Voltage relaxation periods graphically 
 if DEBUG_PLOT
-    for (i = 1 : 67)
-i= 10;
+    figure();
     delta = 100;
-    figure(i)
+    
+    for (i = 1 : 67)
     plot(meas.Time((indexes(i).start-delta):indexes(i).end),meas.Voltage((indexes(i).start-delta):indexes(i).end))
-    str = sprintf('meas.Voltage((indexes(%d).start-%d):indexes(%d).end)', i, delta, i)
-    title( str );
-
+    title(sprintf('meas.Voltage((indexes(%d).start-%d):indexes(%d).end)', i, delta, i));
+   
+    disp('Press any key to continue, Ctrl C to end.');
     pause;
-
     end
 end
 
 % Clean Workspace
-clear i n delta str;
+clear i n delta;
 
- %% Initialize Parameters
+%% Initialize Parameters
  
  %Average R0
- disp('Average R0 ... ')
-% Valor de R0 Obtenido a partir de promediar todos los R0(i) de cada pulso
-% de descarga en todos los SOC
-% Da muy cercana al valor ajustado por lucho, R0 = 0.0256
-R0 = Average_R0(meas.Current,meas.Voltage);
+ disp('Average R0 ... ');
+ 
+% R0 value is obtained averaging the R0(i) calculated from every discharge pulse for each SOC 
+% Value should be close to R0 = 0.0256 in our case.
+R0 = Average_R0(meas.Current,meas.Voltage)
 
+% Set initial values for R1, C1, R2 & C2
 R1 = [0.0273228292774916];
 C1 = [172.286830453445];
 R2 = [0.120006294781068];
 C2 = [485.470579532194];
 
-
-
-
-
-
-%% Iterative Optimization! 
-
+%% Iterative Optimizer! 
 
 for i = 1:length(indexes)-1
     
-    %Para una sola muestra, debe estar comentado
-%     i = 67;
-    i= 15;
-    str = sprintf('procesando ensayo numero %d ...', i);
-    disp(str);
+    % If you want to calculate and approximate parameters from a single discharge pulse uncomment i value:
+    % i = 67;
+  
+    disp(sprintf('Proccesing discharge pulse number %d ...', i));
 
-    % Delta Start
+    % Start Delta
     ds = 100;
-    % Delta end
+    % End Delta
     de = 0;
     
     n_samples = (indexes(i).end+de)-(indexes(i).start-ds) + 1;
@@ -231,22 +238,24 @@ for i = 1:length(indexes)-1
     
     %plot
     if DEBUG_PLOT
-        figure(1)
-        subplot(2,1,1)
+        figure();
+        ax1 = subplot(2,1,1)
         plot(meas.Time((indexes(i).start-ds):(indexes(i).end+de)),current_buffer );
-        subplot(2,1,2)
+        ax2 = subplot(2,1,2)
         plot(meas.Time((indexes(i).start-ds):(indexes(i).end+de)),voltage_buffer);
+        linkaxes([ax1, ax2], 'x');
         grid on;
         
-        figure(2)
-        plot(meas.Time((indexes(i).start-ds):(indexes(i).end+de)),voltage_buffer,meas.Time((indexes(i).start-ds):(indexes(i).end+de)),Vprima);
-        grid on;
+        % DEPRECATED! 
+        % figure();
+        % plot(meas.Time((indexes(i).start-ds):(indexes(i).end+de)),voltage_buffer,meas.Time((indexes(i).start-ds):(indexes(i).end+de)),Vprima);
+        % grid on;
         
-%         figure (3)
+%         figure ();
 %         plot(meas.Time(indexes(i).inicio:indexes(i).fin),Vprima,meas.Time(indexes(i).inicio:indexes(i).fin),meas.Voltage(indexes(i).inicio:indexes(i).fin));
     end
 
-    vOpt = Optimization()
+    vOpt = Optimization(voltage_buffer, time_buffer, Start, Stop, i)
 
     % Rescue optimized parameters on lookup table's vectors
     R1 = vOpt(1).Value;
