@@ -1,12 +1,9 @@
 # Semi-Automatic Li-Ion battery RC model parameters estimator
 
-Developed by ***Federico Ceccarelli***, in collaboration with 
-[Martin Moya](https://github.com/moyamartin) and Lucio Santos, for a Li-Ion 
-BMS.
+Developed by ***[Federico D. Ceccarelli](https://github.com/fededc88)***, ***[Martin Moya](https://github.com/moyamartin)***
+and ***[Lucio Santos](https://github.com/lusho2206)*** for the ***[BMS project](https://github.com/fededc88/bms_unr)***.
 
-Universidad Nacional de Rosario
-
-Any kind of Submission are welcome to fededc88@gmail.com
+### Brief
 
 The code implements a numerical optimization algorithm using Simulink Parameter 
 Estimation, as part of the System Identification Toolbox, to estimate R y C 
@@ -18,6 +15,14 @@ For this example it was used a five pulses discharge HPPC test (0.5, 1, 2, 4,
 6C) performed at 100, 95, 90, 80, 70..., 30, 25, 20, 15, 10, 5, 0 SOC.
 The data set was taken from the battery test performed at the University of 
 Wisconsin-Madison by *Dr. Phillip Kollmeyer* [[1]]
+
+### Folder structure
+
+This repo includes [Panasonic 18650PF Li-Ion Battery Data](https://github.com/fededc88/Panasonic-18650PF-Data) as a submodule, so in order to clone and get the five pulses discharge HPPC test do:
+
+```
+git clone https://github.com/fededc88/Li-Ion-Battery-parameters-estimator.git --recurse-submodules -j<n_cores>
+```
 
 ## Bibliography
 
@@ -41,14 +46,18 @@ Compact Power Inc.
 Dr. Phillip Kollmeyer (2018). 
 Panasonic 18650PF Li-ion Battery Data
 
-For this example was used the five pulses discharge HPPC test (0.5, 1, 2, 4, 6C) performed at 100, 95,
-90, 80, 70..., 30, 25, 20, 15, 10, 5, 0 % SOC.
-Data was taken from the battery test performed at the University of Wisconsin-Madison by *Dr. Phillip Kollmeyer* (phillip.kollmeyer@gmail.com).
-
 ## Referencing
 
 Do you find this project interesting or useful for your work? Please let us know 
-(@moyamartin, @fededc88, @lusho2206) and cite this work using:
+([@fededc88](https://github.com/fededc88), [@moyamartin](https://github.com/moyamartin) & [@lusho2206](https://github.com/lusho2206)).
+
+Any kind of submission are welcome!
+
+Electronic Engineering\
+Faculty of Exact Sciences, Engineering and Land Surveing\
+National University of Rosario (Universidad Nacional de Rosario, UNR)
+
+### Cite this work using
 
 ```
 @article {
