@@ -13,13 +13,13 @@ disp('Change Current Folder to active file name location');
 cd  (fileparts(matlab.desktop.editor.getActiveFilename));
 
 disp('adding... ./Lib path');
-addpath("./Lib");
+addpath('./Lib');
 disp('adding... ./Simulink Models path');
-addpath("./Simulink Models");
+addpath('./Simulink Models');
 disp('adding... ./Panasonic-18650PF-Data path');
-addpath("./Panasonic-18650PF-Data");
+addpath('./Panasonic-18650PF-Data');
 disp('adding... /Lib/Optimizer path');
-addpath("./Lib/Optimizer");
+addpath('./Lib/Optimizer');
 
 %% Load data to workspace from dataset
 
