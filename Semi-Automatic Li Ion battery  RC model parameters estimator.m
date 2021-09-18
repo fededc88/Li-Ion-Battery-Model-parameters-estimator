@@ -1,17 +1,22 @@
 %% Lets Obtain parameters!
 
 % Semi-Automatic  Li-Ion battery RC model parameters estimator
-
 % Developed by Federico Ceccarelli for a Li-Ion BMS. In
 % collaboration with Martin Moya and Lucio Santos
 
 % Submission are welcome to fededc88@gmail.com
 
+%%
+clc;
+clear all;
+close all;
+
+fprintf('<strong> >> Semi-Automatic  Li-Ion battery RC model parameters estimator << </strong>\n\r');
 %% Load dependencies
+fprintf('<strong> Load dependencies </strong>\n');
 
 disp('Change Current Folder to active file name location');
 cd  (fileparts(matlab.desktop.editor.getActiveFilename));
-
 disp('adding... ./Lib path');
 addpath('./Lib');
 disp('adding... ./Simulink Models path');
@@ -22,6 +27,7 @@ disp('adding... /Lib/Optimizer path');
 addpath('./Lib/Optimizer');
 
 %% Load data to workspace from dataset
+fprintf('<strong>Load data to workspace from dataset </strong>\n');
 
 % The included tests were performed at the University of Wisconsin-Madison
 % by Dr. Phillip Kollmeyer (phillip.kollmeyer@gmail.com).
@@ -60,9 +66,9 @@ if DEBUG_PLOT
 end
 
 %% Determine SOC
+fprintf('<strong>Determine SOC </strong>\n');
 
 % From amp-hour data determine the SOC for the entire test time.
-
 min_ah = -1*min(meas.Ah);
 SOC = (meas.Ah + min_ah)/min_ah;
 SOC_table = [meas.Time,SOC];
@@ -80,6 +86,7 @@ if DEBUG_PLOT
 end
 
 %% Rescue flanks positions on Current Vector
+fprintf('<strong>Rescue flanks positions on Current Vector </strong>\n');
 
 Current_flanks = flanks(meas.Current, 50);
 
@@ -93,8 +100,9 @@ if DEBUG_PLOT
 end
 
 %% Rescue OCV values
-
-% Rescue OCV and indexes position from dataset 
+fprintf('<strong>Rescue OCV values </strong>\n');
+% Rescue OCV and indexes position from dataset
+disp('Rescuing OCV and indexes position from dataset...');
 n=1;
 for i = 1 : length(meas.Voltage)
     if(Current_flanks(i) == -1)
@@ -131,7 +139,9 @@ if DEBUG_PLOT
     title( 'Voltage Vs Vocv');
 end
 
-%% %% Rescue SOC values for Look Up table
+%% Rescue SOC values for Look Up table
+fprintf('<strong>Rescue SOC values for Look Up table </strong>\n');
+
 n = 1;
 for i = 1 : length(SOC)
     if(Current_flanks(i) == 1)
@@ -141,10 +151,12 @@ for i = 1 : length(SOC)
 end
 
 %% Valid Data periods
+fprintf('<strong>Valid Data periods </strong>\n');
 
 indexes = struct('start',0,'end',0);
 
 % Find and saves elemen number where start and end every relaxation Preriode
+disp('Finding and saving relaxation start and stop point');
 i=1;
 for( n = 1 : length(Current_flanks) )
 
@@ -163,6 +175,7 @@ if DEBUG_PLOT
     delta = 100;
     
     for (i = 1 : 67)
+    disp(sprintf('Validates Voltage relaxation period %d graphically ',i));
     plot(meas.Time((indexes(i).start-delta):indexes(i).end),meas.Voltage((indexes(i).start-delta):indexes(i).end))
     title(sprintf('meas.Voltage((indexes(%d).start-%d):indexes(%d).end)', i, delta, i));
    
@@ -175,6 +188,7 @@ end
 clear i n delta;
 
 %% Initialize Parameters
+ fprintf('<strong>Initialize Parameters</strong>\n');
  
  %Average R0
  disp('Average R0 ... ');
@@ -184,17 +198,22 @@ clear i n delta;
 R0 = Average_R0(meas.Current,meas.Voltage)
 
 % Set initial values for R1, C1, R2 & C2
-R1 = [0.0273228292774916];
-C1 = [172.286830453445];
-R2 = [0.120006294781068];
-C2 = [485.470579532194];
+ disp('Set initial values for R1, C1, R2 & C2 ... ');
+R1 = [0.0273228292774916]
+C1 = [172.286830453445]
+R2 = [0.120006294781068]
+C2 = [485.470579532194]
 
 %% Iterative Optimizer! 
+ fprintf('<strong>Iterative Optimizer!</strong>\n');
+ 
+% Globlasl variables
+global Start Stop voltage_buffer time_buffer
 
 for i = 1:length(indexes)-1
     
     % If you want to calculate and approximate parameters from a single discharge pulse uncomment i value:
-   % i = 12;
+    %i = 12;
   
     disp(sprintf('Proccesing discharge pulse number %d ...', i));
 
@@ -205,14 +224,17 @@ for i = 1:length(indexes)-1
     
     n_samples = (indexes(i).end+de)-(indexes(i).start-ds) + 1;
     
+    index_dsStart = (indexes(i).start-ds);
+    index_deStop = (indexes(i).end+de);
+    
     % Guardar Tiempos entre rangos 
-    time_buffer = meas.Time((indexes(i).start-ds):(indexes(i).end+de));
+    time_buffer = meas.Time(index_dsStart:index_deStop);
     % Guarda el Vocv entre rangos
-    Vocv_buffer =  Vocv((indexes(i).start-ds):(indexes(i).end+de));
+    Vocv_buffer =  Vocv(index_dsStart:index_deStop);
     % Guarda el voltage entre rangos
-    voltage_buffer = meas.Voltage((indexes(i).start-ds):(indexes(i).end+de));
+    voltage_buffer = meas.Voltage(index_dsStart:index_deStop);
     %Guardo la corriente entre rangos
-    current_buffer = meas.Current((indexes(i).start-ds):(indexes(i).end+de));
+    current_buffer = meas.Current(index_dsStart:index_deStop);
    
     %Generate imputs for simulation
    
@@ -222,8 +244,11 @@ for i = 1:length(indexes)-1
     current_buffer_table(:,1) = time_buffer;
     current_buffer_table(:,2) = current_buffer;
     
-    Start = sprintf('%d',  meas.Time(indexes(i).start-ds));
-    Stop = sprintf('%d',  meas.Time(indexes(i).end+de));
+    dStart = meas.Time(index_dsStart);
+    dStop = meas.Time(indexes(i).end+de);
+    
+    Start = sprintf('%d', dStart);
+    Stop = sprintf('%d', dStop);
     
 %     % DEPRECATED! 
 
@@ -240,10 +265,18 @@ for i = 1:length(indexes)-1
     if DEBUG_PLOT
         figure();
         ax1 = subplot(2,1,1)
-        plot(meas.Time((indexes(i).start-ds):(indexes(i).end+de)),current_buffer );
+        plot(time_buffer,current_buffer );
+        title(sprintf('time buffer vs current buffer PULSE: %d', i));
+        xlabel('time [t]');
+        ylabel('current_buffer [I]');
+        grid on;
+        
         ax2 = subplot(2,1,2)
-        plot(meas.Time((indexes(i).start-ds):(indexes(i).end+de)),voltage_buffer);
+        plot(time_buffer,voltage_buffer);
+        title(sprintf('time buffer vs voltage buffer PULSE: %d', i));
         linkaxes([ax1, ax2], 'x');
+        xlabel('time [t]');
+        ylabel('voltage_buffer [v]');
         grid on;
         
         % DEPRECATED! 
@@ -255,7 +288,7 @@ for i = 1:length(indexes)-1
 %         plot(meas.Time(indexes(i).inicio:indexes(i).fin),Vprima,meas.Time(indexes(i).inicio:indexes(i).fin),meas.Voltage(indexes(i).inicio:indexes(i).fin));
     end
 
-    vOpt = Optimization(voltage_buffer, time_buffer, i)
+    vOpt = Optimization(i)
 
     % Rescue optimized parameters on lookup table's vectors
     R1 = vOpt(1).Value;

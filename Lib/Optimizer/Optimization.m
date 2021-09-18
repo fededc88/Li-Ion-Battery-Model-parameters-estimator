@@ -1,9 +1,9 @@
 
-function vOpt = Optimization(voltage_buffer, time_buffer, i)
+function vOpt = Optimization(i)
 %TODO description
 
 %% Globlasl variables
-global Start Stop
+global Start Stop voltage_buffer time_buffer
 
 % Create an experiment object to store the measured input/output data.
 Exp = sdo.Experiment('SingleSOC_Battery_Model');
@@ -20,7 +20,7 @@ TerminalV.Values    = timeseries(voltage_buffer,time_buffer);
 
 %Add the measured terminal Voltahe data to the experiment as the expected output data.
 
-Exp.OutputData = [ TerminalV ];
+Exp.OutputData = [TerminalV];
 
 % Add the initial state for the Model blocks to the experiment. Set its Free field to true so that it is estimated.
 % Check!
@@ -33,7 +33,7 @@ Simulator = createSimulator(Exp);
 Simulator    = sim(Simulator, 'StartTime', Start, 'StopTime', Stop );
 
 % Search for the Terminal Voltage signal in the logged simulation data.
-SimLog       = find(Simulator.LoggedData,get_param('SingleSOC_Battery_Model','SignalLoggingName'));
+SimLog = find(Simulator.LoggedData,get_param('SingleSOC_Battery_Model','SignalLoggingName'));
 TerminalVSignal = find(SimLog,'TerminalV');
 
 figure
