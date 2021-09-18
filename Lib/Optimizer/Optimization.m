@@ -1,5 +1,9 @@
 
-function vOpt = Optimization(voltage_buffer, time_buffer, Start, Stop, i)
+function vOpt = Optimization(voltage_buffer, time_buffer, i)
+%TODO description
+
+%% Globlasl variables
+global Start Stop
 
 % Create an experiment object to store the measured input/output data.
 Exp = sdo.Experiment('SingleSOC_Battery_Model');

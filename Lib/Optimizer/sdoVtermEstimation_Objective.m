@@ -49,7 +49,7 @@ Exp  = setEstimatedValues(Exp,v);
 Simulator = createSimulator(Exp,Simulator);
 Simulator = sim(Simulator, 'StartTime', Start, 'StopTime', Stop );
 
-SimLog      = find(Simulator.LoggedData,get_param('SingleSOC_Batery_Model','SignalLoggingName'));
+SimLog      = find(Simulator.LoggedData,get_param('SingleSOC_Battery_Model','SignalLoggingName'));
 TerminalV   = find(SimLog,'TerminalV');
 
 VtermError = evalRequirement(r,TerminalV.Values,Exp.OutputData(1).Values);

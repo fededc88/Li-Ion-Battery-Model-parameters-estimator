@@ -194,7 +194,7 @@ C2 = [485.470579532194];
 for i = 1:length(indexes)-1
     
     % If you want to calculate and approximate parameters from a single discharge pulse uncomment i value:
-    % i = 67;
+   % i = 12;
   
     disp(sprintf('Proccesing discharge pulse number %d ...', i));
 
@@ -255,7 +255,7 @@ for i = 1:length(indexes)-1
 %         plot(meas.Time(indexes(i).inicio:indexes(i).fin),Vprima,meas.Time(indexes(i).inicio:indexes(i).fin),meas.Voltage(indexes(i).inicio:indexes(i).fin));
     end
 
-    vOpt = Optimization(voltage_buffer, time_buffer, Start, Stop, i)
+    vOpt = Optimization(voltage_buffer, time_buffer, i)
 
     % Rescue optimized parameters on lookup table's vectors
     R1 = vOpt(1).Value;
