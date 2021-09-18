@@ -46,7 +46,7 @@ end
 
 %% Selecting the Number of R-C Branches
 
-% Tomo el n semiperiodo de relajación para ajustar una curva
+% Tomo el n semiperiodo de relajaciï¿½n para ajustar una curva
 % polinomial y decidir que orden utilizar.
 n = 10;
 sample_v = Voltage(index(n).s : index(n).e);
@@ -55,6 +55,17 @@ plot(sample_time,sample_v)
 
 % Fit: 'Eq_RC_Circuit'.
 [xData, yData] = prepareCurveData( sample_time, sample_v );
+
+% Set up fittype and options.
+% exp1 => Y = a*exp(b*x)
+ft1 = fittype( 'exp1' );
+opts1 = fitoptions( 'Method', 'NonlinearLeastSquares' );
+opts1.Display = 'Off';
+opts1.Normalize = 'on';
+opts1.StartPoint = [-0.00080023 -3.5629];
+
+% Fit model to data.
+[fitresult1, gof] = fit( xData, yData, ft1, opts1 );
 
 % Set up fittype and options.
 % exp2 => Y = a*exp(b*x)+c*exp(d*x)
@@ -69,11 +80,13 @@ opts.StartPoint = [4.0866 -1.1738e-05 -0.00080023 -3.5629];
 
 % Plot fit vs data and conclude.
 figure( 'Name', 'exp orden 2' );
-title('Curve fit to determine number of R-C branches')
-h = plot( fitresult, xData, yData );
-legend( h, 'experimental data', 'exp2 aproximation', 'Location', 'NorthEast' );
-xlabel time
-ylabel Voltage
+title('Curve fit to determine number of R-C model branches')
+h = plot( fitresult, xData, yData, 'b.');
+hold on;
+hg = plot( fitresult1, 'c--' );
+legend( [h;hg], 'experimental data', 'exp2 aproximation', 'exp1 aproximation', 'Location', 'NorthEast' );
+xlabel ('time [s]');
+ylabel ('Voltage [v]');
 grid on
 
 %%
