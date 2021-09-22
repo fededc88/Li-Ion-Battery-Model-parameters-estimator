@@ -18,7 +18,7 @@ TerminalV.PortType  = 'outport';
 TerminalV.PortIndex = 1;
 TerminalV.Values    = timeseries(voltage_buffer,time_buffer);
 
-%Add the measured terminal Voltahe data to the experiment as the expected output data.
+%Add the measured terminal Voltage data to the experiment as the expected output data.
 
 Exp.OutputData = [TerminalV];
 
@@ -37,7 +37,7 @@ SimLog = find(Simulator.LoggedData,get_param('SingleSOC_Battery_Model','SignalLo
 TerminalVSignal = find(SimLog,'TerminalV');
 
 figure
-subplot(2,1,1);
+sx1 = subplot(2,1,1);
 plot(time_buffer, voltage_buffer, TerminalVSignal.Values.Time,TerminalVSignal.Values.Data);
 str = sprintf('Simulated Response Vs Measured Response (Before Optimization) PULSE: %d', double(i));
 title(str);
@@ -88,13 +88,15 @@ Simulator    = sim(Simulator,'StartTime', Start, 'StopTime', Stop);
 SimLog    = find(Simulator.LoggedData,get_param('SingleSOC_Battery_Model','SignalLoggingName'));
 TerminalV = find(SimLog,'TerminalV');
 
-subplot(2,1,2);
+sx2 =  subplot(2,1,2);
 plot(time_buffer, voltage_buffer, TerminalV.Values.Time,TerminalV.Values.Data);
 str = sprintf('Simulated Response Vs Measured Response (After Optimization) PULSE: %d', i);
 title(str);
 legend('Measured Terminal Voltage', 'Simulated Terminal Voltage');
 xlabel('time [t]');
 ylabel('Vterm [v]');
+
+linkaxes([sx1, sx2], 'x');
 
 end
 
